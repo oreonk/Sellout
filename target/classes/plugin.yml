@@ -1,0 +1,8 @@
+main: com.oreonk.Sellout
+name: Sellout
+version: 1
+depend: [Vault]
+api-version: 1.17
+commands:
+  sellout:
+    description: "Основная команда"
