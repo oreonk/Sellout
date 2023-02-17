@@ -25,7 +25,8 @@ public class MenuInteract implements Listener {
                     donateUpdate(player);
                 }
                 if (event.getCurrentItem().hasItemMeta() && !event.getCurrentItem().getItemMeta().hasDisplayName() && !event.getCurrentItem().getType().equals(Material.LIME_STAINED_GLASS_PANE)){
-                    if (event.getCurrentItem().getItemMeta().getLore().contains(ChatColor.GRAY + "Общее")) {
+                    ArrayList<String> public_item_positions = (ArrayList<String>) Sellout.getInstance().getConfig().getConfigurationSection("Util.Menu").getStringList("public_items");
+                    if (public_item_positions.contains(String.valueOf(event.getSlot()))) {
                         ItemStack testItemStack = new ItemStack(event.getCurrentItem().getType());
                         testItemStack.setAmount(64);
                         if (player.getInventory().contains(testItemStack)) {
@@ -47,7 +48,8 @@ public class MenuInteract implements Listener {
                             player.closeInventory();
                         }
                     }
-                    if (event.getCurrentItem().getItemMeta().getLore().contains(ChatColor.GRAY + "Личное")){
+                    ArrayList<String> private_item_positions = (ArrayList<String>) Sellout.getInstance().getConfig().getConfigurationSection("Util.Menu").getStringList("private_items");
+                    if (private_item_positions.contains(String.valueOf(event.getSlot()))){
                         ItemStack testItemStack = new ItemStack(event.getCurrentItem().getType());
                         testItemStack.setAmount(64);
                         if (player.getInventory().contains(testItemStack)) {

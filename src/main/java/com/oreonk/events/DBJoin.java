@@ -19,7 +19,7 @@ public class DBJoin implements Listener {
             Sellout.getInstance().privateSelloutReset(event.getPlayer());
         }
         LocalDateTime now = LocalDateTime.now();
-        if (ChronoUnit.SECONDS.between(Sellout.getInstance().privateTimers.get(event.getPlayer()), now) >= Integer.parseInt(Sellout.getInstance().getConfig().getString("Timings.Private"))) {
+        if (ChronoUnit.MINUTES.between(Sellout.getInstance().privateTimers.get(event.getPlayer()), now) >= Integer.parseInt(Sellout.getInstance().getConfig().getString("Timings.Private"))) {
             Sellout.getInstance().privateSelloutReset(event.getPlayer());
         }
     }

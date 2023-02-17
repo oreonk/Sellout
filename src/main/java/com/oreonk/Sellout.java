@@ -4,10 +4,13 @@ import com.oreonk.commands.Main;
 import com.oreonk.events.DBJoin;
 import com.oreonk.events.LeaveEvent;
 import com.oreonk.events.MenuInteract;
+import com.oreonk.events.NpcInteract;
 import com.oreonk.sqlite.DatabaseCommand;
 import com.oreonk.sqlite.SQLite;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -15,10 +18,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -42,17 +47,34 @@ public class Sellout extends JavaPlugin{
             publicSelloutHandle();
         }
         setupEconomy();
+        try {
+            final Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+
+            bukkitCommandMap.setAccessible(true);
+            CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
+
+            Command command = commandMap.getCommand("sellout");
+            List<String> aliasees = command.getAliases();
+            aliasees.add(this.getConfig().getString("Util.Commands.all"));
+            command.setAliases(aliasees);
+            commandMap.register("sellout", command);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
         this.getCommand("sellout").setExecutor(new Main());
         getServer().getPluginManager().registerEvents(new DBJoin(), this);
         getServer().getPluginManager().registerEvents(new LeaveEvent(), this);
         getServer().getPluginManager().registerEvents(new MenuInteract(), this);
+        getServer().getPluginManager().registerEvents(new NpcInteract(), this);
         publicItems = this.db.publicItemsHashmap();
         publicTimer = this.db.publicItemsTime();
         new BukkitRunnable() {
             public void run() {
                 for (Map.Entry<Player,LocalDateTime> entry : privateTimers.entrySet()){
                     LocalDateTime now = LocalDateTime.now();
-                    if(ChronoUnit.SECONDS.between(entry.getValue(), now) >= Integer.parseInt(getConfig().getString("Timings.Private"))){
+                    if(ChronoUnit.MINUTES.between(entry.getValue(), now) >= Integer.parseInt(getConfig().getString("Timings.Private"))){
                         privateSelloutReset(entry.getKey());
                     }
                 }
@@ -61,7 +83,7 @@ public class Sellout extends JavaPlugin{
         new BukkitRunnable() {
             public void run() {
                 LocalDateTime now = LocalDateTime.now();
-                if(ChronoUnit.SECONDS.between(publicTimer, now) >= Integer.parseInt(getConfig().getString("Timings.Public"))){
+                if(ChronoUnit.MINUTES.between(publicTimer, now) >= Integer.parseInt(getConfig().getString("Timings.Public"))){
                     publicSelloutHandle();
                 }
             }
