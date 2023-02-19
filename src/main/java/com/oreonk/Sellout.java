@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -18,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -35,11 +37,16 @@ public class Sellout extends JavaPlugin{
     public HashMap<Player, ArrayList<ItemStack>> privateItems = new HashMap<>() {};
     public HashMap<Player, LocalDateTime> privateTimers = new HashMap<>() {};
     public LocalDateTime publicTimer;
+    public FileConfiguration config;
+    public File cfile;
     @Override
     public void onEnable() {
         instance = this;
         System.out.println("[Sellout] Оно живое..");
-        saveDefaultConfig();
+        config = getConfig();
+        config.options().copyDefaults(true);
+        saveConfig();
+        cfile = new File(getDataFolder(), "config.yml");
         this.db = new SQLite(this);
         this.db.load();
         this.db.createTable();
@@ -74,7 +81,7 @@ public class Sellout extends JavaPlugin{
             public void run() {
                 for (Map.Entry<Player,LocalDateTime> entry : privateTimers.entrySet()){
                     LocalDateTime now = LocalDateTime.now();
-                    if(ChronoUnit.MINUTES.between(entry.getValue(), now) >= Integer.parseInt(getConfig().getString("Timings.Private"))){
+                    if(ChronoUnit.MINUTES.between(entry.getValue().minusMinutes(1), now) >= Integer.parseInt(getConfig().getString("Timings.Private"))){
                         privateSelloutReset(entry.getKey());
                     }
                 }
@@ -83,7 +90,8 @@ public class Sellout extends JavaPlugin{
         new BukkitRunnable() {
             public void run() {
                 LocalDateTime now = LocalDateTime.now();
-                if(ChronoUnit.MINUTES.between(publicTimer, now) >= Integer.parseInt(getConfig().getString("Timings.Public"))){
+                //Bukkit.getConsoleSender().sendMessage("Таймер " + ChronoUnit.MINUTES.between(now, publicTimer));
+                if(ChronoUnit.MINUTES.between(publicTimer.minusMinutes(1), now) >= Integer.parseInt(getConfig().getString("Timings.Public"))){
                     publicSelloutHandle();
                 }
             }

@@ -10,6 +10,8 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -29,14 +31,11 @@ public class Main implements CommandExecutor {
                     Msg.send(player, ChatColor.RED + "Ошибка в ведённом перме Util.Perms.admin");
                     return true;
                 }
-                if (!player.hasPermission(Sellout.getInstance().getConfig().getString("Util.Perms.admin"))) {
-                    return true;
-                }
                 if (Sellout.getInstance().getConfig().getString("Util.Commands.all") == null) {
                     Msg.send(player, ChatColor.RED + "Ошибка в введённом начале команды Util.Commands.all");
                     return true;
                 }
-                if (arguments.length == 1 && arguments[0].equals("help")) {
+                if (arguments.length == 1 && arguments[0].equals("help") && player.hasPermission(Sellout.getInstance().getConfig().getString("Util.Perms.admin"))) {
                     Msg.send(player, ChatColor.LIGHT_PURPLE + "/" + label + " help" + ChatColor.WHITE + " - список команд");
                     Msg.send(player, ChatColor.LIGHT_PURPLE + "/" + label + ChatColor.WHITE + " - открыть меню скупщика");
                     Msg.send(player, ChatColor.LIGHT_PURPLE + "/" + label + " reload" + ChatColor.WHITE + " - перезагрузка конфигурации плагина");
@@ -163,6 +162,9 @@ public class Main implements CommandExecutor {
                     player.openInventory(gui);
                     return true;
                 } else if (arguments.length == 2 && arguments[0].equals("open") && Bukkit.getPlayer(arguments[1]) != null) {
+                    if (!player.hasPermission(Sellout.getInstance().getConfig().getString("Util.Perms.admin"))) {
+                        return true;
+                    }
                     String guiName = Sellout.getInstance().getConfig().getString("Util.Menu.name");
                     if (guiName == null) {
                         guiName = "Скупщик";
@@ -280,21 +282,36 @@ public class Main implements CommandExecutor {
                     Bukkit.getPlayer(arguments[1]).openInventory(gui);
                     return true;
                 } else if (arguments.length == 2 && arguments[0].equals("restart") && arguments[1].equals("global")) {
+                    if (!player.hasPermission(Sellout.getInstance().getConfig().getString("Util.Perms.admin"))) {
+                        return true;
+                    }
                     Sellout.getInstance().publicSelloutHandle();
                     return true;
                 } else if (arguments.length == 1 && arguments[0].equals("restart")) {
+                    if (!player.hasPermission(Sellout.getInstance().getConfig().getString("Util.Perms.admin"))) {
+                        return true;
+                    }
                     for (Player player1 : Bukkit.getServer().getOnlinePlayers()) {
                         Sellout.getInstance().privateSelloutReset(player1);
                     }
                     Sellout.getInstance().publicSelloutHandle();
                     return true;
                 } else if (arguments.length == 3 && arguments[0].equals("restart") && arguments[1].equals("local") && Bukkit.getPlayer(arguments[2]) == null) {
+                    if (!player.hasPermission(Sellout.getInstance().getConfig().getString("Util.Perms.admin"))) {
+                        return true;
+                    }
                     Msg.send(player, ChatColor.RED + "Игрока с таким ником нет!");
                     return true;
                 } else if (arguments.length == 3 && arguments[0].equals("restart") && arguments[1].equals("local") && Bukkit.getPlayer(arguments[2]) != null) {
+                    if (!player.hasPermission(Sellout.getInstance().getConfig().getString("Util.Perms.admin"))) {
+                        return true;
+                    }
                     Sellout.getInstance().privateSelloutReset(Bukkit.getPlayer(arguments[2]));
                     return true;
                 } else if (arguments.length == 1 && arguments[0].equals("reload")) {
+                    if (!player.hasPermission(Sellout.getInstance().getConfig().getString("Util.Perms.admin"))) {
+                        return true;
+                    }
                     Sellout.getInstance().reloadConfig();
                     return true;
                 }
